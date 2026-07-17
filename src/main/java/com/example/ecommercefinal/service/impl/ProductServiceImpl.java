@@ -28,9 +28,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProductById(int id) {
+    public Product getProductById(int id) throws Exception {
         return productRepository.findById(id).orElseThrow(() ->
-                new ProductNotFoundException("Product not found"));
+                new Exception("Product not found"));
     }
 
     @Override
@@ -41,5 +41,21 @@ public class ProductServiceImpl implements ProductService {
             return true;
         }
         else return false;
+    }
+
+    @Override
+    public Product updateProduct(int id, Product product) {
+        Product existingProduct=productRepository.findById(id).orElse(null);
+        if(existingProduct !=null){
+            existingProduct.setBrand(product.getBrand());
+            existingProduct.setName(product.getName());
+            existingProduct.setPrice(product.getPrice());
+            existingProduct.setSku(product.getSku());
+            existingProduct.setDescription(product.getDescription());
+            existingProduct.setQuantity(product.getQuantity());
+            return productRepository.save(existingProduct);
+        }
+
+        return null;
     }
 }

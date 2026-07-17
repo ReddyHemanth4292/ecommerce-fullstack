@@ -114,4 +114,10 @@
 								</path>
 							</annotationProcessorPaths>
 						</configuration>
-					</execu
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
