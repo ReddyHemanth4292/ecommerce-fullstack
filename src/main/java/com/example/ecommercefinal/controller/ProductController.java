@@ -2,6 +2,7 @@ package com.example.ecommercefinal.controller;
 
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class ProductController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+    public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product){
         Product savedProduct=productService.createProduct(product);
         return new ResponseEntity<>(savedProduct,HttpStatus.CREATED);
     }
@@ -34,14 +35,14 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable int id){
+    public ResponseEntity<String> deleteProduct(@PathVariable int id){
         boolean is_deleted= productService.deleteProduct(id);
-        if(is_deleted) return new ResponseEntity(HttpStatus.OK);
-        else return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        if(is_deleted) return new ResponseEntity("Product deleted successfully",HttpStatus.OK);
+        else return new ResponseEntity("Product not found",HttpStatus.NOT_FOUND);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable int id, @RequestBody Product product){
+    public ResponseEntity<Product> updateProduct(@PathVariable int id, @Valid @RequestBody Product product){
         Product updatedProduct=productService.updateProduct(id,product);
         if(updatedProduct!=null){
             return new ResponseEntity<>(updatedProduct,HttpStatus.OK);
