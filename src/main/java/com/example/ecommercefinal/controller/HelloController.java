@@ -9,4 +9,10 @@ public class HelloController {
     public String hello(){
         return "Good Start!!";
     }
+
+    @GetMapping("/test")
+    public String test() {
+        int result = 10 / 0;
+        return "Success";
+    }
 }

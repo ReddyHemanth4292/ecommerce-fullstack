@@ -1,6 +1,7 @@
 package com.example.ecommercefinal.service.impl;
 
 import com.example.ecommercefinal.entity.Product;
+import com.example.ecommercefinal.exception.ProductNotFoundException;
 import com.example.ecommercefinal.repository.ProductRepository;
 import com.example.ecommercefinal.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProductById(int id) throws Exception {
+    public Product getProductById(int id) {
         return productRepository.findById(id).orElseThrow(() ->
-                new Exception("Product not found"));
+         new ProductNotFoundException("Product with "+ id +" not found"));
     }
 
     @Override
