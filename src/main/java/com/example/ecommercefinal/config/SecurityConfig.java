@@ -11,7 +11,12 @@ import java.net.http.HttpRequest;
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll()).csrf(csrf -> csrf.disable());
+        http.authorizeHttpRequests(auth ->
+                                auth.requestMatchers("/api/auth/**")
+                                        .permitAll()
+                                        .anyRequest().authenticated()
+                )
+                .csrf(csrf -> csrf.disable());
         return http.build();
     }
 }
