@@ -1,5 +1,6 @@
 package com.example.ecommercefinal.controller;
 
+import com.example.ecommercefinal.dto.LoginRequest;
 import com.example.ecommercefinal.dto.RegisterRequest;
 import com.example.ecommercefinal.service.AuthService;
 import jakarta.validation.Valid;
@@ -24,6 +25,12 @@ public class AuthController {
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request){
         String response= authService.register(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request){
+        String response= authService.login(request);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
 }
