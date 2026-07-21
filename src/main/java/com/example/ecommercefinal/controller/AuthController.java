@@ -3,14 +3,12 @@ package com.example.ecommercefinal.controller;
 import com.example.ecommercefinal.dto.LoginRequest;
 import com.example.ecommercefinal.dto.RegisterRequest;
 import com.example.ecommercefinal.service.AuthService;
+import com.example.ecommercefinal.service.JwtService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -31,6 +29,12 @@ public class AuthController {
     public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request){
         String response= authService.login(request);
         return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
+    @GetMapping("/token")
+    public String token() {
+        JwtService jwtService = new JwtService();
+        return jwtService.generateToken("hemanth@gmail.com");
     }
 
 }
