@@ -37,4 +37,13 @@ public class AuthController {
         return jwtService.generateToken("hemanth@gmail.com");
     }
 
+    @GetMapping("/username")
+    public String username() {
+
+        JwtService jwtService = new JwtService();
+        String token =
+                jwtService.generateToken("hemanth@gmail.com");
+
+        return jwtService.extractExpiration(token).toString();
+    }
 }
