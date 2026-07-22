@@ -1,5 +1,6 @@
 package com.example.ecommercefinal.controller;
 
+import com.example.ecommercefinal.dto.AuthResponse;
 import com.example.ecommercefinal.dto.LoginRequest;
 import com.example.ecommercefinal.dto.RegisterRequest;
 import com.example.ecommercefinal.service.AuthService;
@@ -26,8 +27,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request){
-        String response= authService.login(request);
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request){
+        AuthResponse response= authService.login(request);
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 

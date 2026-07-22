@@ -1,5 +1,6 @@
 package com.example.ecommercefinal.service.impl;
 
+import com.example.ecommercefinal.dto.AuthResponse;
 import com.example.ecommercefinal.dto.LoginRequest;
 import com.example.ecommercefinal.dto.RegisterRequest;
 import com.example.ecommercefinal.entity.Role;
@@ -7,6 +8,7 @@ import com.example.ecommercefinal.entity.User;
 import com.example.ecommercefinal.exception.EmailAlreadyExistsException;
 import com.example.ecommercefinal.repository.UserRepository;
 import com.example.ecommercefinal.service.AuthService;
+import com.example.ecommercefinal.service.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,11 +43,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         Authentication authentication=authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
         System.out.println(authentication.getName());
         System.out.println(authentication.getAuthorities());
-        return "Login Successful";
+        JwtService jwtService=new JwtService();
+        AuthResponse authResponse=new AuthResponse(jwtService.generateToken(authentication.getName()));
+        return authResponse;
     }
 }
