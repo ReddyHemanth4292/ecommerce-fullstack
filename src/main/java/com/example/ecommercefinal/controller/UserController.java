@@ -1,12 +1,12 @@
 package com.example.ecommercefinal.controller;
 
+import com.example.ecommercefinal.dto.UpdateProfileRequest;
 import com.example.ecommercefinal.dto.UserResponse;
 import com.example.ecommercefinal.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,4 +23,11 @@ public class UserController {
         UserResponse user=userService.getCurrentUser();
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateCurrentUser(@Valid @RequestBody UpdateProfileRequest request){
+        UserResponse response= userService.updateCurrentUser(request);
+        return new ResponseEntity<>(response,HttpStatus.OK);
+    }
+
 }

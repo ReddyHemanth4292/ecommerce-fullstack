@@ -1,6 +1,7 @@
 package com.example.ecommercefinal.service.impl;
 
 import com.example.ecommercefinal.config.SecurityConfig;
+import com.example.ecommercefinal.dto.UpdateProfileRequest;
 import com.example.ecommercefinal.dto.UserResponse;
 import com.example.ecommercefinal.entity.User;
 import com.example.ecommercefinal.repository.UserRepository;
@@ -25,6 +26,17 @@ public class UserServiceImpl implements UserService {
         String email= authentication.getName();
         User user = userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("user not found"));
         UserResponse response= new UserResponse(user.getId(),user.getName(),user.getEmail(),user.getRole());
+        return response;
+    }
+
+    @Override
+    public UserResponse updateCurrentUser(UpdateProfileRequest request) {
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+        String email= authentication.getName();
+        User user=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not Found"));
+        user.setName(request.getName());
+        userRepository.save(user);
+        UserResponse response=new UserResponse(user.getId(),user.getName(),user.getEmail(),user.getRole());
         return response;
     }
 }
