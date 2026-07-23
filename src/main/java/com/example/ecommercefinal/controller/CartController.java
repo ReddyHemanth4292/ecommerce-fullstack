@@ -26,4 +26,11 @@ public class CartController {
     public ResponseEntity<CartResponse> getAllItems(){
         return new ResponseEntity<>(cartService.getCart(),HttpStatus.OK);
     }
+
+    @DeleteMapping("/items/{cartItemId}")
+    public ResponseEntity<String> removeCartItem(@PathVariable Integer cartItemId){
+        cartService.removeCartItem(cartItemId);
+        return new ResponseEntity<>("Cart item removed successfully.",HttpStatus.OK);
+    }
+
 }

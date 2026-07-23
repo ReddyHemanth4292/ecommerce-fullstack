@@ -12,10 +12,10 @@ import com.example.ecommercefinal.repository.CartRepository;
 import com.example.ecommercefinal.repository.ProductRepository;
 import com.example.ecommercefinal.repository.UserRepository;
 import com.example.ecommercefinal.service.CartService;
-import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,6 +65,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CartResponse getCart() {
         Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
         String email=authentication.getName();
@@ -79,5 +80,26 @@ public class CartServiceImpl implements CartService {
         Integer totalItems=itemResponses.stream().mapToInt(CartItemResponse::getQuantity).sum();
         Double totalPrice=itemResponses.stream().mapToDouble(CartItemResponse::getSubtotal).sum();
         return new CartResponse(itemResponses,totalItems,totalPrice);
+    }
+
+    @Override
+    @Transactional
+    public void removeCartItem(Integer cartItemId) {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email).orElseThrow(() ->
+                new RuntimeException("User not found"));
+
+        Cart cart=cartRepository.findByUser(user).orElseThrow(()-> new RuntimeException("Cart not Found"));
+        CartItem cartItem=cartItemRepository.findById(cartItemId).orElseThrow(()-> new RuntimeException("Cart item not found"));
+
+        if(cartItem.getCart().getId()!=cart.getId()){
+            throw new RuntimeException("You are not allowed to delete this cart item.");
+        }
+        cartItemRepository.delete(cartItem);
+
     }
 }

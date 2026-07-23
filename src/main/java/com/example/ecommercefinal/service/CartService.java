@@ -5,6 +5,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface CartService {
     void addProductToCart(Integer productId);
-
-    CartResponse getCart();;
+    CartResponse getCart();
+    void removeCartItem(Integer cartItemId);
 }
