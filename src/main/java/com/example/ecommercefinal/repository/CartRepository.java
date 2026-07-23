@@ -2,6 +2,7 @@ package com.example.ecommercefinal.repository;
 
 import com.example.ecommercefinal.entity.Cart;
 import com.example.ecommercefinal.entity.User;
+import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

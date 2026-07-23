@@ -1,5 +1,6 @@
 package com.example.ecommercefinal.service.impl;
 
+import com.example.ecommercefinal.entity.Cart;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.entity.User;
 import com.example.ecommercefinal.exception.ProductNotFoundException;
@@ -32,5 +33,12 @@ public class CartServiceImpl implements CartService {
         String email=authentication.getName();
         User user=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not Found"));
         Product product=productRepository.findById(productId).orElseThrow(()->new ProductNotFoundException("Product Not Found"));
+        Cart cart= cartRepository.findByUser(user).orElse(null);
+        if(cart==null){
+            cart=new Cart();
+            cart.setUser(user);
+            cartRepository.save(cart);
+        }
+
     }
 }
