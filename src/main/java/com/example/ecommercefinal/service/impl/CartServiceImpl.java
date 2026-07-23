@@ -12,6 +12,7 @@ import com.example.ecommercefinal.repository.CartRepository;
 import com.example.ecommercefinal.repository.ProductRepository;
 import com.example.ecommercefinal.repository.UserRepository;
 import com.example.ecommercefinal.service.CartService;
+import com.example.ecommercefinal.service.helper.AuthenticatedUserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,20 +27,20 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public CartServiceImpl(UserRepository userRepository, ProductRepository productRepository, CartRepository cartRepository, CartItemRepository cartItemRepository) {
+    public CartServiceImpl(UserRepository userRepository, ProductRepository productRepository, CartRepository cartRepository, CartItemRepository cartItemRepository, AuthenticatedUserService authenticatedUserService) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @Transactional
     @Override
     public void addProductToCart(Integer productId) {
-        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        String email=authentication.getName();
-        User user=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not Found"));
+        User user = authenticatedUserService.getCurrentUser();
         Product product=productRepository.findById(productId).orElseThrow(()->new ProductNotFoundException("Product Not Found"));
         Cart cart= cartRepository.findByUser(user).orElse(null);
         if(cart==null){
@@ -67,10 +68,9 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional(readOnly = true)
     public CartResponse getCart() {
-        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
-        String email=authentication.getName();
-        User user=userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("user not found"));
-        Cart cart=cartRepository.findByUser(user).orElseThrow(()->new RuntimeException("Cart not found"));;
+        User user = authenticatedUserService.getCurrentUser();
+
+        Cart cart=cartRepository.findByUser(user).orElseThrow(()->new RuntimeException("Cart not found"));
         List<CartItem> cartItems = cart.getCartItems();
         List<CartItemResponse> itemResponses=cartItems.stream().map(cartItem -> {
             Product product= cartItem.getProduct();
@@ -85,13 +85,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void removeCartItem(Integer cartItemId) {
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email).orElseThrow(() ->
-                new RuntimeException("User not found"));
+        User user = authenticatedUserService.getCurrentUser();
 
         Cart cart=cartRepository.findByUser(user).orElseThrow(()-> new RuntimeException("Cart not Found"));
         CartItem cartItem=cartItemRepository.findById(cartItemId).orElseThrow(()-> new RuntimeException("Cart item not found"));
