@@ -24,6 +24,5 @@ public class HelloController {
     public String passwordEncode(@RequestParam String password){
         BCryptPasswordEncoder encoder=new BCryptPasswordEncoder();
         return encoder.encode(password);
-
     }
 }
