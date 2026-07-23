@@ -1,6 +1,7 @@
 package com.example.ecommercefinal.service.impl;
 
 import com.example.ecommercefinal.entity.Cart;
+import com.example.ecommercefinal.entity.CartItem;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.entity.User;
 import com.example.ecommercefinal.exception.ProductNotFoundException;
@@ -39,6 +40,20 @@ public class CartServiceImpl implements CartService {
             cart.setUser(user);
             cartRepository.save(cart);
         }
+
+        CartItem cartItem= cartItemRepository.findByCartAndProduct(cart,product).orElse(null);
+        if(cartItem==null){
+            cartItem=new CartItem();
+            cartItem.setProduct(product);
+            cartItem.setQuantity(1);
+            cartItem.setCart(cart);
+            cartItemRepository.save(cartItem);
+        }
+        else{
+            cartItem.setQuantity(cartItem.getQuantity()+1);
+            cartItemRepository.save(cartItem);
+        }
+
 
     }
 }
