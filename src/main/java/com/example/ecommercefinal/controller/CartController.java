@@ -24,6 +24,6 @@ public class CartController {
 
     @GetMapping
     public ResponseEntity<CartResponse> getAllItems(){
-        return new ResponseEntity<>(cartService.getAllItems(),HttpStatus.OK);
+        return new ResponseEntity<>(cartService.getCart(),HttpStatus.OK);
     }
 }
