@@ -2,6 +2,7 @@ package com.example.ecommercefinal.service.impl;
 
 import com.example.ecommercefinal.dto.CartItemResponse;
 import com.example.ecommercefinal.dto.CartResponse;
+import com.example.ecommercefinal.dto.UpdateCartItemRequest;
 import com.example.ecommercefinal.entity.Cart;
 import com.example.ecommercefinal.entity.CartItem;
 import com.example.ecommercefinal.entity.Product;
@@ -95,5 +96,21 @@ public class CartServiceImpl implements CartService {
         }
         cartItemRepository.delete(cartItem);
 
+    }
+
+    @Override
+    @Transactional
+    public CartResponse updateCartItem(Integer cartItemId, UpdateCartItemRequest request) {
+        User user=authenticatedUserService.getCurrentUser();
+        Cart cart=cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Cart not found"));
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        if(!cartItem.getCart().getId().equals(cart.getId())){
+            throw new RuntimeException("You cannot modify another user's cart.");
+        }
+
+        cartItem.setQuantity(request.getQuantity());
+        cartItemRepository.save(cartItem);
+        return getCart();
     }
 }
