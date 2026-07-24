@@ -9,4 +9,5 @@ public interface CartService {
     CartResponse getCart();
     void removeCartItem(Integer cartItemId);
     CartResponse updateCartItem(Integer cartItemId, UpdateCartItemRequest request);
+    void clearCart();
 }
