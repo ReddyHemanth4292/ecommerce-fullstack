@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
@@ -74,5 +75,42 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return response;
+    }
+
+    private OrderResponse mapToOrderResponse(Order order) {
+
+        OrderResponse response = new OrderResponse();
+
+        response.setId(order.getId());
+        response.setOrderDate(order.getOrderDate());
+        response.setStatus(order.getStatus());
+        response.setTotalAmount(order.getTotalAmount());
+
+        for (OrderItem orderItem : order.getOrderItems()) {
+
+            OrderItemResponse itemResponse = new OrderItemResponse();
+
+            itemResponse.setProductName(orderItem.getProductName());
+            itemResponse.setPrice(orderItem.getPrice());
+            itemResponse.setQuantity(orderItem.getQuantity());
+            itemResponse.setSubtotal(orderItem.getSubtotal());
+
+            response.getItems().add(itemResponse);
+        }
+
+        return response;
+    }
+
+    @Override
+    public List<OrderResponse> getMyOrders() {
+        User user=authenticatedUserService.getCurrentUser();
+        List<Order> orders=orderRepository.findByUserOrderByOrderDateDesc(user);
+        List<OrderResponse> responses = new ArrayList<>();
+
+        for(Order order : orders){
+            responses.add(mapToOrderResponse(order));
+        }
+
+        return responses;
     }
 }
