@@ -5,10 +5,7 @@ import com.example.ecommercefinal.entity.Order;
 import com.example.ecommercefinal.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,5 +30,10 @@ public class OrderController {
     public ResponseEntity<List<OrderResponse>> getOrders(){
 
         return new ResponseEntity<>(orderService.getMyOrders(),HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Integer id){
+        return new ResponseEntity<>(orderService.getOrderById(id),HttpStatus.OK);
     }
 }

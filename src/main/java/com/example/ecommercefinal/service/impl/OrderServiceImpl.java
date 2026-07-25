@@ -3,12 +3,14 @@ package com.example.ecommercefinal.service.impl;
 import com.example.ecommercefinal.dto.OrderItemResponse;
 import com.example.ecommercefinal.dto.OrderResponse;
 import com.example.ecommercefinal.entity.*;
+import com.example.ecommercefinal.exception.OrderNotFoundException;
 import com.example.ecommercefinal.repository.CartItemRepository;
 import com.example.ecommercefinal.repository.CartRepository;
 import com.example.ecommercefinal.repository.OrderRepository;
 import com.example.ecommercefinal.repository.UserRepository;
 import com.example.ecommercefinal.service.OrderService;
 import com.example.ecommercefinal.service.helper.AuthenticatedUserService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,7 +112,19 @@ public class OrderServiceImpl implements OrderService {
         for(Order order : orders){
             responses.add(mapToOrderResponse(order));
         }
-
         return responses;
+    }
+
+    @Override
+    public OrderResponse getOrderById(Integer orderId) {
+        User user=authenticatedUserService.getCurrentUser();
+        //Order order= orderRepository.findByUserAndId(user,orderId).orElseThrow(()->new RuntimeException("order not found exception"));
+        //OrderResponse response=mapToOrderResponse(order);
+        Order order=orderRepository.findById(orderId).orElseThrow(()-> new OrderNotFoundException("Order Not found"));
+        if(!order.getUser().getId().equals(user.getId())){
+            throw new AccessDeniedException("This order id not belongs to you");
+        }
+        OrderResponse response=mapToOrderResponse(order);
+        return response;
     }
 }
