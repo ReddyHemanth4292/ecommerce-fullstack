@@ -3,12 +3,8 @@ package com.example.ecommercefinal.service.impl;
 import com.example.ecommercefinal.dto.OrderItemResponse;
 import com.example.ecommercefinal.dto.OrderResponse;
 import com.example.ecommercefinal.entity.*;
-import com.example.ecommercefinal.exception.AccessDeniedException;
-import com.example.ecommercefinal.exception.OrderNotFoundException;
-import com.example.ecommercefinal.repository.CartItemRepository;
-import com.example.ecommercefinal.repository.CartRepository;
-import com.example.ecommercefinal.repository.OrderRepository;
-import com.example.ecommercefinal.repository.UserRepository;
+import com.example.ecommercefinal.exception.*;
+import com.example.ecommercefinal.repository.*;
 import com.example.ecommercefinal.service.OrderService;
 import com.example.ecommercefinal.service.helper.AuthenticatedUserService;
 import org.springframework.stereotype.Service;
@@ -24,19 +20,21 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
 
-    public OrderServiceImpl(AuthenticatedUserService authenticatedUserService, CartRepository cartRepository, CartItemRepository cartItemRepository, OrderRepository orderRepository) {
+    public OrderServiceImpl(AuthenticatedUserService authenticatedUserService, CartRepository cartRepository, CartItemRepository cartItemRepository, OrderRepository orderRepository, ProductRepository productRepository) {
         this.authenticatedUserService = authenticatedUserService;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
     }
 
     @Override
     @Transactional
     public OrderResponse checkout() {
         User user= authenticatedUserService.getCurrentUser();
-        Cart cart=cartRepository.findByUser(user).orElseThrow(()->new RuntimeException("Cart not found."));
+        Cart cart=cartRepository.findByUser(user).orElseThrow(()->new CartNotFoundException("Cart not found."));
         if (cart.getCartItems().isEmpty()) {
             throw new RuntimeException("Cannot checkout an empty cart");
         }
@@ -44,39 +42,34 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(OrderStatus.PLACED);
-        Double totalAmount = 0.0;
         List<CartItem> cartItems=cart.getCartItems();
-        List<OrderItem> orderItems= cartItems.stream().map(cartItem -> {
-            OrderItem orderItem=new OrderItem();
-            orderItem.setProductName(cartItem.getProduct().getName());
+        List<OrderItem> orderItems= new ArrayList<>();
+        for(CartItem cartItem:cartItems) {
+            Product product = productRepository.findById(
+                            cartItem.getProduct().getId())
+                    .orElseThrow(() ->
+                            new ProductNotFoundException("Product not found"));
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(product);
+            if (product.getQuantity() < cartItem.getQuantity()) {
+                throw new InsufficientStockException(
+                        "Not enough stock for " + product.getName());
+            }
+            product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+            productRepository.save(product);
+            orderItem.setProductName(product.getName());
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(cartItem.getProduct().getPrice());
-            orderItem.setSubtotal(cartItem.getProduct().getPrice() * cartItem.getQuantity());
+            orderItem.setPrice(product.getPrice());
+            orderItem.setSubtotal(product.getPrice() * cartItem.getQuantity());
             orderItem.setOrder(order);
-            return orderItem;
-        }).collect(Collectors.toList());
+            orderItems.add(orderItem);
+        }
         order.getOrderItems().addAll(orderItems);
         order.setTotalAmount(orderItems.stream().mapToDouble(OrderItem::getSubtotal).sum());
         Order savedOrder = orderRepository.save(order);
         cartItemRepository.deleteAll(cart.getCartItems());
         cart.getCartItems().clear();
-
-        OrderResponse response=new OrderResponse();
-        response.setId(savedOrder.getId());
-        response.setOrderDate(savedOrder.getOrderDate());
-        response.setStatus(savedOrder.getStatus());
-        response.setTotalAmount(savedOrder.getTotalAmount());
-
-        for(OrderItem orderItem : savedOrder.getOrderItems()){
-            OrderItemResponse itemResponse = new OrderItemResponse();
-            itemResponse.setProductName(orderItem.getProductName());
-            itemResponse.setPrice(orderItem.getPrice());
-            itemResponse.setQuantity(orderItem.getQuantity());
-            itemResponse.setSubtotal(orderItem.getSubtotal());
-            response.getItems().add(itemResponse);
-        }
-
-        return response;
+        return mapToOrderResponse(savedOrder);
     }
 
     private OrderResponse mapToOrderResponse(Order order) {
@@ -126,5 +119,32 @@ public class OrderServiceImpl implements OrderService {
         }
         OrderResponse response=mapToOrderResponse(order);
         return response;
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse cancelOrder(Integer orderId) {
+        User user=authenticatedUserService.getCurrentUser();
+        Order order=orderRepository.findById(orderId).orElseThrow(()->new OrderNotFoundException(""));
+        if(!order.getUser().getId().equals(user.getId())){
+            throw new AccessDeniedException("You are not allowed to access this order.");
+        }
+        if(order.getStatus() != OrderStatus.PLACED && order.getStatus() != OrderStatus.PROCESSING){
+            throw new InvalidOrderStateException("Only placed or processing orders can be cancelled.");
+        }
+
+        List<OrderItem> orderItems=order.getOrderItems();
+        for(OrderItem orderItem : orderItems){
+            Product product = productRepository.findById(orderItem.getProduct().getId())
+                    .orElseThrow(() ->
+                            new ProductNotFoundException("Product not found"));
+           product.setQuantity(product.getQuantity() + orderItem.getQuantity());
+           productRepository.save(product);
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        Order updatedOrder =orderRepository.save(order);
+
+        return mapToOrderResponse(updatedOrder);
     }
 }

@@ -36,4 +36,11 @@ public class OrderController {
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Integer id){
         return new ResponseEntity<>(orderService.getOrderById(id),HttpStatus.OK);
     }
+
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Integer id){
+        OrderResponse response = orderService.cancelOrder(id);
+
+        return ResponseEntity.ok(response);
+    }
 }

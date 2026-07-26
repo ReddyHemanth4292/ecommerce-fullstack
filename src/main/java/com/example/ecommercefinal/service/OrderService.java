@@ -9,5 +9,6 @@ public interface OrderService {
     OrderResponse checkout();
     List<OrderResponse> getMyOrders();
     OrderResponse getOrderById(Integer orderId);
+    OrderResponse cancelOrder(Integer orderId);
 
 }
