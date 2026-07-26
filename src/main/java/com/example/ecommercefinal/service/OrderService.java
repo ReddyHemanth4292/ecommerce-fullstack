@@ -10,5 +10,6 @@ public interface OrderService {
     List<OrderResponse> getMyOrders();
     OrderResponse getOrderById(Integer orderId);
     OrderResponse cancelOrder(Integer orderId);
+    List<OrderResponse> getAllOrders();
 
 }
