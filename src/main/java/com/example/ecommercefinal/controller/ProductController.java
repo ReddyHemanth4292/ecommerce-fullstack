@@ -1,5 +1,6 @@
 package com.example.ecommercefinal.controller;
 
+import com.example.ecommercefinal.dto.PageResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.service.ProductService;
 import jakarta.validation.Valid;
@@ -27,8 +28,8 @@ public class ProductController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Product>> getAllProducts(){
-        return new ResponseEntity<>(productService.getAllProducts(),HttpStatus.OK);
+    public ResponseEntity<PageResponse<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size){
+        return new ResponseEntity<>(productService.getAllProducts(page, size),HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

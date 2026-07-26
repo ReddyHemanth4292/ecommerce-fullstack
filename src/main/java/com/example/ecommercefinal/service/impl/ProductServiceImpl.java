@@ -1,10 +1,14 @@
 package com.example.ecommercefinal.service.impl;
 
+import com.example.ecommercefinal.dto.PageResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.exception.ProductNotFoundException;
 import com.example.ecommercefinal.repository.ProductRepository;
 import com.example.ecommercefinal.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,8 +28,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public PageResponse<Product> getAllProducts(int page, int size) {
+        Pageable pageable= PageRequest.of(page,size);
+        Page<Product> productPage = productRepository.findAll(pageable);
+        return new PageResponse<>(
+                productPage.getContent(),
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.isFirst(),
+                productPage.isLast()
+        );
     }
 
     @Override
