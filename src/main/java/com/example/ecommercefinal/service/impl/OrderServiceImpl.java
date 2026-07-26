@@ -153,4 +153,27 @@ public class OrderServiceImpl implements OrderService {
         List<Order>orders=orderRepository.findAll();
         return orders.stream().map(this::mapToOrderResponse).toList();
     }
+
+    private boolean isValidStatusTransition(OrderStatus current, OrderStatus next) {
+        return switch (current) {
+            case PLACED -> next == OrderStatus.PROCESSING || next == OrderStatus.CANCELLED;
+            case PROCESSING -> next == OrderStatus.SHIPPED || next == OrderStatus.CANCELLED;
+            case SHIPPED -> next == OrderStatus.DELIVERED;
+            case DELIVERED, CANCELLED -> false;
+        };
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse updateOrderStatus(Integer orderId, OrderStatus status) {
+        Order order=orderRepository.findById(orderId).orElseThrow(()->new OrderNotFoundException("Order not found"));
+        OrderStatus currentStatus=order.getStatus();
+        if(!isValidStatusTransition(currentStatus,status)){
+            throw new InvalidOrderStateException("Invalid order status transition from "
+                    + currentStatus + " to " + status);
+        }
+        order.setStatus(status);
+        Order updatedOrder = orderRepository.save(order);
+        return mapToOrderResponse(updatedOrder);
+    }
 }
