@@ -29,6 +29,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageResponse<Product> getAllProducts(int page, int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException("Page number cannot be negative.");
+        }
+
+        if (size <= 0) {
+            throw new IllegalArgumentException("Page size must be greater than zero.");
+        }
+
+        if (size > 50) {
+            throw new IllegalArgumentException("Maximum page size allowed is 50.");
+        }
         Pageable pageable= PageRequest.of(page,size);
         Page<Product> productPage = productRepository.findAll(pageable);
         return new PageResponse<>(
