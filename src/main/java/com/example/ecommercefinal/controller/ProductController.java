@@ -28,8 +28,8 @@ public class ProductController {
     }
 
     @GetMapping("")
-    public ResponseEntity<PageResponse<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size){
-        return new ResponseEntity<>(productService.getAllProducts(page, size),HttpStatus.OK);
+    public ResponseEntity<PageResponse<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "id") String sortBy, @RequestParam(defaultValue = "asc") String direction){
+        return new ResponseEntity<>(productService.getAllProducts(page, size,sortBy,direction),HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

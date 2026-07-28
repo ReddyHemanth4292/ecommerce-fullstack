@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageResponse<Product> getAllProducts(int page, int size) {
+    public PageResponse<Product> getAllProducts(int page, int size,String sortBy, String direction) {
         if (page < 0) {
             throw new IllegalArgumentException("Page number cannot be negative.");
         }
@@ -40,7 +41,19 @@ public class ProductServiceImpl implements ProductService {
         if (size > 50) {
             throw new IllegalArgumentException("Maximum page size allowed is 50.");
         }
-        Pageable pageable= PageRequest.of(page,size);
+
+        List<String> allowedSortFields = List.of("id", "name", "brand", "price", "quantity");
+        if (!allowedSortFields.contains(sortBy)) {
+            throw new IllegalArgumentException("Invalid sort field: " + sortBy);
+        }
+
+        if(!direction.equals("asc") && !direction.equals("desc")){
+            throw new IllegalArgumentException("Direction must be 'asc' or 'desc'.");
+        }
+
+        Sort sort=Sort.by(direction.equalsIgnoreCase("asc")? Sort.Direction.ASC:Sort.Direction.DESC,sortBy);
+
+        Pageable pageable= PageRequest.of(page,size,sort);
         Page<Product> productPage = productRepository.findAll(pageable);
         return new PageResponse<>(
                 productPage.getContent(),
