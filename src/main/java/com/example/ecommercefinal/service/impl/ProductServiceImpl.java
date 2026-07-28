@@ -100,9 +100,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getProductsByBrand(String brand) {
-        if(brand==null && !brand.isBlank()){
+        if(brand==null || brand.isBlank()){
             throw new IllegalArgumentException("Brand cannot be empty");
         }
         return productRepository.findByBrand(brand);
+    }
+
+    @Override
+    public List<Product> searchProducts(String keyword) {
+        if(keyword==null || keyword.isBlank()){
+            throw new IllegalArgumentException(("Search keyword cannot be empty."));
+        }
+        return productRepository.findByBrandContainingIgnoreCase(keyword);
     }
 }

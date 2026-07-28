@@ -12,4 +12,5 @@ public interface ProductService {
     boolean deleteProduct(int id);
     Product updateProduct(int id, Product product);
     List<Product> getProductsByBrand(String brand);
+    List<Product> searchProducts(String keyword);
 }
