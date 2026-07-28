@@ -97,4 +97,12 @@ public class ProductServiceImpl implements ProductService {
 
         return null;
     }
+
+    @Override
+    public List<Product> getProductsByBrand(String brand) {
+        if(brand==null && !brand.isBlank()){
+            throw new IllegalArgumentException("Brand cannot be empty");
+        }
+        return productRepository.findByBrand(brand);
+    }
 }

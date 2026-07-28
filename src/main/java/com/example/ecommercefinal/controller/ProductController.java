@@ -54,4 +54,11 @@ public class ProductController {
         }
         else return new ResponseEntity<>(updatedProduct,HttpStatus.BAD_REQUEST);
     }
+
+    @GetMapping("/brand/{brand}")
+    public ResponseEntity<List<Product>> getProductsByBrand(@PathVariable String brand){
+        List<Product> products=productService.getProductsByBrand(brand);
+        return new ResponseEntity<>(products,HttpStatus.OK);
+    }
+
 }
