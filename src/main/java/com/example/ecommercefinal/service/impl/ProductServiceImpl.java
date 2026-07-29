@@ -113,4 +113,18 @@ public class ProductServiceImpl implements ProductService {
         }
         return productRepository.findByBrandContainingIgnoreCase(keyword);
     }
+
+    @Override
+    public List<Product> getProductsByPriceRange(Double minPrice, Double maxPrice) {
+        if (minPrice == null || maxPrice == null) {
+            throw new IllegalArgumentException("Minimum and maximum price are required.");
+        }
+        if(minPrice<0 || maxPrice<0){
+            throw new IllegalArgumentException("Price cannot be negative.");
+        }
+        if(minPrice>maxPrice){
+            throw new IllegalArgumentException("Minimum price cannot be greater than maximum price.");
+        }
+        return productRepository.findByPriceBetween(minPrice,maxPrice);
+    }
 }

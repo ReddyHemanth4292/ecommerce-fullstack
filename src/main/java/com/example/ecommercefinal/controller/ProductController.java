@@ -67,4 +67,10 @@ public class ProductController {
         return new ResponseEntity<>(products,HttpStatus.OK);
     }
 
+    @GetMapping("/price")
+    public ResponseEntity<List<Product>> getProductsByPriceRange(@RequestParam Double minPrice, @RequestParam Double maxPrice){
+        List<Product> products=productService.getProductsByPriceRange(minPrice,maxPrice);
+        return new ResponseEntity<>(products,HttpStatus.OK);
+    }
+
 }
