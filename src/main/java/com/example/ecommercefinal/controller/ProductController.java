@@ -1,8 +1,10 @@
 package com.example.ecommercefinal.controller;
 
+import com.example.ecommercefinal.dto.PageResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,8 +29,8 @@ public class ProductController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Product>> getAllProducts(){
-        return new ResponseEntity<>(productService.getAllProducts(),HttpStatus.OK);
+    public ResponseEntity<PageResponse<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "id") String sortBy, @RequestParam(defaultValue = "asc") String direction){
+        return new ResponseEntity<>(productService.getAllProducts(page, size,sortBy,direction),HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -53,4 +55,40 @@ public class ProductController {
         }
         else return new ResponseEntity<>(updatedProduct,HttpStatus.BAD_REQUEST);
     }
+
+    @GetMapping("/brand/{brand}")
+    public ResponseEntity<List<Product>> getProductsByBrand(@PathVariable String brand){
+        List<Product> products=productService.getProductsByBrand(brand);
+        return new ResponseEntity<>(products,HttpStatus.OK);
+    }
+
+    @GetMapping("/search/{brand}")
+    public ResponseEntity<List<Product>> searchProducts(@PathVariable String keyword){
+        List<Product> products=productService.searchProducts(keyword);
+        return new ResponseEntity<>(products,HttpStatus.OK);
+    }
+
+    @GetMapping("/price")
+    public ResponseEntity<List<Product>> getProductsByPriceRange(@RequestParam Double minPrice, @RequestParam Double maxPrice){
+        List<Product> products=productService.getProductsByPriceRange(minPrice,maxPrice);
+        return new ResponseEntity<>(products,HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchProducts(
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice) {
+        List<Product> products =
+                productService.searchProducts(
+                        brand,
+                        name,
+                        minPrice,
+                        maxPrice
+                );
+
+        return ResponseEntity.ok(products);
+    }
+
 }
