@@ -5,11 +5,13 @@ import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.exception.ProductNotFoundException;
 import com.example.ecommercefinal.repository.ProductRepository;
 import com.example.ecommercefinal.service.ProductService;
+import com.example.ecommercefinal.specification.ProductSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -126,5 +128,38 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Minimum price cannot be greater than maximum price.");
         }
         return productRepository.findByPriceBetween(minPrice,maxPrice);
+    }
+
+    @Override
+    public List<Product> searchProducts(String brand, String name, Double minPrice, Double maxPrice) {
+        if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+            throw new IllegalArgumentException(
+                    "Minimum price cannot be greater than maximum price."
+            );
+        }
+        Specification<Product> specification = Specification.unrestricted();
+
+        if (brand != null && !brand.isBlank()) {
+            specification = specification.and(
+                    ProductSpecification.hasBrand(brand));
+        }
+
+        if (name != null && !name.isBlank()) {
+            specification = specification.and(
+                    ProductSpecification.nameContains(name));
+        }
+
+        if (minPrice != null) {
+            specification = specification.and(
+                    ProductSpecification.priceGreaterThanOrEqualTo(minPrice));
+        }
+
+        if (maxPrice != null) {
+            specification = specification.and(
+                    ProductSpecification.priceLessThanOrEqualTo(maxPrice));
+        }
+
+        return productRepository.findAll(specification);
+
     }
 }

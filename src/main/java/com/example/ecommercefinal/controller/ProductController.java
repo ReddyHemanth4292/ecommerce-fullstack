@@ -4,6 +4,7 @@ import com.example.ecommercefinal.dto.PageResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -71,6 +72,23 @@ public class ProductController {
     public ResponseEntity<List<Product>> getProductsByPriceRange(@RequestParam Double minPrice, @RequestParam Double maxPrice){
         List<Product> products=productService.getProductsByPriceRange(minPrice,maxPrice);
         return new ResponseEntity<>(products,HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchProducts(
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice) {
+        List<Product> products =
+                productService.searchProducts(
+                        brand,
+                        name,
+                        minPrice,
+                        maxPrice
+                );
+
+        return ResponseEntity.ok(products);
     }
 
 }
