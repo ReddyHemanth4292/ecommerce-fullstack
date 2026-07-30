@@ -3,7 +3,14 @@ package com.example.ecommercefinal.controller;
 import com.example.ecommercefinal.dto.PageResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,26 +22,84 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
+@Tag(
+        name = "Product Management",
+        description = "APIs for managing products"
+)
 public class ProductController {
     private final ProductService productService;
     public ProductController(ProductService productService){
         this.productService=productService;
     }
 
+    @Operation(
+            summary = "Create a new product",
+            description = "Creates a new product in the catalog"
+    )
+
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Product created successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation failed"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            )
+    })
+
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("")
     public ResponseEntity<Product> createProduct(@Valid @RequestBody Product product){
         Product savedProduct=productService.createProduct(product);
         return new ResponseEntity<>(savedProduct,HttpStatus.CREATED);
     }
+    @Operation(
+            summary = "Get all products",
+            description = "Returns all available products"
+    )
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Products retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            )
+    })
+
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("")
     public ResponseEntity<PageResponse<Product>> getAllProducts(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "id") String sortBy, @RequestParam(defaultValue = "asc") String direction){
         return new ResponseEntity<>(productService.getAllProducts(page, size,sortBy,direction),HttpStatus.OK);
     }
 
+    @Operation(
+            summary = "Get product by ID",
+            description = "Retrieve a single product using its ID"
+    )
+
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Product found"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Product not found"
+            )
+    })
+
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable int id) throws Exception {
+    public ResponseEntity<Product> getProductById( @Parameter(description = "Unique product ID", example = "1") @PathVariable int id) throws Exception {
         return new ResponseEntity<>(productService.getProductById(id),HttpStatus.OK);
     }
 
@@ -75,18 +140,17 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProducts(
+    public ResponseEntity<PageResponse<Product>> searchProducts(
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice) {
-        List<Product> products =
-                productService.searchProducts(
-                        brand,
-                        name,
-                        minPrice,
-                        maxPrice
-                );
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue ="5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc")String direction) {
+        PageResponse<Product> products =
+                productService.searchProducts(brand, name, minPrice, maxPrice, page, size, sortBy, direction);
 
         return ResponseEntity.ok(products);
     }

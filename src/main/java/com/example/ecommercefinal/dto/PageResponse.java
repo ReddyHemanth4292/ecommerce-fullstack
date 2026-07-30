@@ -1,21 +1,23 @@
 package com.example.ecommercefinal.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
-
+@Schema(description = "Generic paginated response")
 public class PageResponse<T> {
-
+    @Schema(description = "Current page content")
     private List<T> content;
-
+    @Schema(example = "0")
     private int page;
-
+    @Schema(example = "5")
     private int size;
-
+    @Schema(example = "120")
     private long totalElements;
-
+    @Schema(example = "24")
     private int totalPages;
-
+    @Schema(example = "true")
     private boolean first;
-
+    @Schema(example = "false")
     private boolean last;
 
     public PageResponse() {
