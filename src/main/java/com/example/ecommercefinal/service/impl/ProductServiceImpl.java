@@ -131,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> searchProducts(String brand, String name, Double minPrice, Double maxPrice) {
+    public PageResponse<Product> searchProducts(String brand, String name, Double minPrice, Double maxPrice,int page, int size, String sortBy, String direction) {
         if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
             throw new IllegalArgumentException(
                     "Minimum price cannot be greater than maximum price."
@@ -158,8 +158,16 @@ public class ProductServiceImpl implements ProductService {
             specification = specification.and(
                     ProductSpecification.priceLessThanOrEqualTo(maxPrice));
         }
-
-        return productRepository.findAll(specification);
+        Sort sort=Sort.by(direction.equalsIgnoreCase("asc")? Sort.Direction.ASC:Sort.Direction.DESC,sortBy);
+        Pageable pageable= PageRequest.of(page,size,sort);
+        Page<Product> productPage=productRepository.findAll(specification,pageable);
+        return new PageResponse<>(productPage.getContent(),
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.isFirst(),
+                productPage.isLast());
 
     }
 }
