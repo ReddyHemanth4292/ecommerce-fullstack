@@ -7,6 +7,8 @@ import com.example.ecommercefinal.exception.*;
 import com.example.ecommercefinal.repository.*;
 import com.example.ecommercefinal.service.OrderService;
 import com.example.ecommercefinal.service.helper.AuthenticatedUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,15 +31,18 @@ public class OrderServiceImpl implements OrderService {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
     }
+    private static final Logger logger= LoggerFactory.getLogger(OrderServiceImpl.class);
 
     @Override
     @Transactional
     public OrderResponse checkout() {
         User user= authenticatedUserService.getCurrentUser();
+        logger.info("Checkout started for user {}", user.getId());
         Cart cart=cartRepository.findByUser(user).orElseThrow(()->new CartNotFoundException("Cart not found."));
         if (cart.getCartItems().isEmpty()) {
             throw new RuntimeException("Cannot checkout an empty cart");
         }
+        logger.info("Checkout started for user {}", user.getId());
         Order order=new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
@@ -52,6 +57,8 @@ public class OrderServiceImpl implements OrderService {
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);
             if (product.getQuantity() < cartItem.getQuantity()) {
+                logger.warn("Insufficient stock for product {}. Requested={}, Available={}",
+                        product.getId(), cartItem.getQuantity(), product.getQuantity());
                 throw new InsufficientStockException(
                         "Not enough stock for " + product.getName());
             }
@@ -67,6 +74,7 @@ public class OrderServiceImpl implements OrderService {
         order.getOrderItems().addAll(orderItems);
         order.setTotalAmount(orderItems.stream().mapToDouble(OrderItem::getSubtotal).sum());
         Order savedOrder = orderRepository.save(order);
+        logger.info("Order {} created successfully for user {}", savedOrder.getId(), user.getId());
         cartItemRepository.deleteAll(cart.getCartItems());
         cart.getCartItems().clear();
         return mapToOrderResponse(savedOrder);
