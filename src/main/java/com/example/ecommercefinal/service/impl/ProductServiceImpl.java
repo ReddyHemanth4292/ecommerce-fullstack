@@ -6,6 +6,8 @@ import com.example.ecommercefinal.exception.ProductNotFoundException;
 import com.example.ecommercefinal.repository.ProductRepository;
 import com.example.ecommercefinal.service.ProductService;
 import com.example.ecommercefinal.specification.ProductSpecification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,7 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
@@ -27,7 +30,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product createProduct(Product product) {
-        return productRepository.save(product);
+        logger.info("Creating product with name: {}",product.getName());
+        Product saved= productRepository.save(product);
+        logger.info("Product created successfully with id: {}", saved.getId());
+        return saved;
     }
 
     @Override
@@ -78,22 +84,30 @@ public class ProductServiceImpl implements ProductService {
     public boolean deleteProduct(int id) {
         //Product product=productRepository.findById(id).orElse(null);
         if(productRepository.existsById(id)){
+            logger.info("Deleting product with id {}", id);
             productRepository.deleteById(id);
+            logger.info("Product {} deleted successfully", id);
             return true;
         }
-        else return false;
+
+        else {
+            logger.warn("Product {} not found for deletion", id);
+            return false;
+        }
     }
 
     @Override
     public Product updateProduct(int id, Product product) {
         Product existingProduct=productRepository.findById(id).orElse(null);
         if(existingProduct !=null){
+            logger.info("Updating product with id {}", id);
             existingProduct.setBrand(product.getBrand());
             existingProduct.setName(product.getName());
             existingProduct.setPrice(product.getPrice());
             existingProduct.setSku(product.getSku());
             existingProduct.setDescription(product.getDescription());
             existingProduct.setQuantity(product.getQuantity());
+            logger.info("Product {} updated successfully", id);
             return productRepository.save(existingProduct);
         }
 
@@ -137,6 +151,8 @@ public class ProductServiceImpl implements ProductService {
                     "Minimum price cannot be greater than maximum price."
             );
         }
+        logger.debug("Searching products - brand: {}, name: {}, minPrice: {}, maxPrice: {}", brand, name, minPrice, maxPrice);
+
         Specification<Product> specification = Specification.unrestricted();
 
         if (brand != null && !brand.isBlank()) {
