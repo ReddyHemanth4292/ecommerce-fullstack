@@ -6,9 +6,13 @@ import com.example.ecommercefinal.exception.ProductNotFoundException;
 import com.example.ecommercefinal.repository.ProductRepository;
 import com.example.ecommercefinal.service.ProductService;
 import com.example.ecommercefinal.specification.ProductSpecification;
+import org.hibernate.annotations.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -74,12 +78,14 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
+    @Cacheable(value = "products",key="#id")
     @Override
     public Product getProductById(int id) {
+        logger.info("Fetching product {} from database", id);
         return productRepository.findById(id).orElseThrow(() ->
          new ProductNotFoundException("Product with "+ id +" not found"));
     }
-
+    @CacheEvict(value = "products", key = "#id")
     @Override
     public boolean deleteProduct(int id) {
         //Product product=productRepository.findById(id).orElse(null);
@@ -95,7 +101,7 @@ public class ProductServiceImpl implements ProductService {
             return false;
         }
     }
-
+    @CachePut(value = "products", key = "#id")
     @Override
     public Product updateProduct(int id, Product product) {
         Product existingProduct=productRepository.findById(id).orElse(null);
