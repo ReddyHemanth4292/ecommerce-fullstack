@@ -1,5 +1,6 @@
 package com.example.ecommercefinal.service.impl;
 
+import com.example.ecommercefinal.config.CacheNames;
 import com.example.ecommercefinal.dto.OrderItemResponse;
 import com.example.ecommercefinal.dto.OrderResponse;
 import com.example.ecommercefinal.entity.*;
@@ -74,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setSubtotal(product.getPrice() * cartItem.getQuantity());
             orderItem.setOrder(order);
             orderItems.add(orderItem);
-            Cache cache = cacheManager.getCache("products");
+            Cache cache = cacheManager.getCache(CacheNames.PRODUCTS);
             if(cache!=null){
                 cache.evict(product.getId());
             }

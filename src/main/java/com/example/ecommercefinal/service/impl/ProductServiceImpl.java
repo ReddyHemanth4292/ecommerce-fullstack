@@ -1,5 +1,6 @@
 package com.example.ecommercefinal.service.impl;
 
+import com.example.ecommercefinal.config.CacheNames;
 import com.example.ecommercefinal.dto.PageResponse;
 import com.example.ecommercefinal.dto.ProductResponse;
 import com.example.ecommercefinal.entity.Product;
@@ -79,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
-    @Cacheable(value = "products",key="#id")
+    @Cacheable(value = CacheNames.PRODUCTS,key="#id")
     @Override
     public ProductResponse getProductById(int id) {
         logger.info("Fetching product {} from database", id);
@@ -102,7 +103,7 @@ public class ProductServiceImpl implements ProductService {
         return response;
     }
 
-    @CacheEvict(value = "products", key = "#id")
+    @CacheEvict(value = CacheNames.PRODUCTS, key = "#id")
     @Override
     public boolean deleteProduct(int id) {
         //Product product=productRepository.findById(id).orElse(null);
@@ -118,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
             return false;
         }
     }
-    @CachePut(value = "products", key = "#id")
+    @CachePut(value = CacheNames.PRODUCTS, key = "#id")
     @Override
     public Product updateProduct(int id, Product product) {
         Product existingProduct=productRepository.findById(id).orElse(null);

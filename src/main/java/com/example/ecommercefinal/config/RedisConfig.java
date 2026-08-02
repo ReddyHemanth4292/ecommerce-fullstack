@@ -1,35 +1,42 @@
 package com.example.ecommercefinal.config;
 
+import com.example.ecommercefinal.dto.ProductResponse;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 
 @Configuration
 public class RedisConfig {
+
     @Bean
     public CacheManager cacheManager(
-            RedisConnectionFactory connectionFactory) {
+            RedisConnectionFactory connectionFactory,
+            ObjectMapper objectMapper) {
 
-        RedisCacheConfiguration configuration =
+        JacksonJsonRedisSerializer<ProductResponse> productSerializer =
+                new JacksonJsonRedisSerializer<>(
+                        objectMapper,
+                        ProductResponse.class
+                );
+
+        RedisCacheConfiguration cacheConfiguration =
                 RedisCacheConfiguration.defaultCacheConfig()
                         .entryTtl(Duration.ofMinutes(10))
                         .serializeValuesWith(
                                 RedisSerializationContext.SerializationPair
-                                        .fromSerializer(
-                                                new GenericJackson2JsonRedisSerializer()
-                                        )
+                                        .fromSerializer(productSerializer)
                         );
 
         return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(configuration)
+                .cacheDefaults(cacheConfiguration)
                 .build();
     }
 }
