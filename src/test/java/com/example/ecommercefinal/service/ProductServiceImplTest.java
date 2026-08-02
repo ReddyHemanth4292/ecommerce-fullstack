@@ -1,4 +1,5 @@
 package com.example.ecommercefinal.service;
+import com.example.ecommercefinal.dto.ProductResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.exception.ProductNotFoundException;
 import com.example.ecommercefinal.repository.ProductRepository;
@@ -39,7 +40,7 @@ class ProductServiceImplTest {
         when(productRepository.findById(1))
                 .thenReturn(Optional.of(product));
 
-        Product response =
+        ProductResponse response =
                 productService.getProductById(1);
 
         assertNotNull(response);

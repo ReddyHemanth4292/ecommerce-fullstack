@@ -1,14 +1,20 @@
 package com.example.ecommercefinal.service.impl;
 
+import com.example.ecommercefinal.config.CacheNames;
 import com.example.ecommercefinal.dto.PageResponse;
+import com.example.ecommercefinal.dto.ProductResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.exception.ProductNotFoundException;
 import com.example.ecommercefinal.repository.ProductRepository;
 import com.example.ecommercefinal.service.ProductService;
 import com.example.ecommercefinal.specification.ProductSpecification;
+import org.hibernate.annotations.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -74,12 +80,30 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
+    @Cacheable(value = CacheNames.PRODUCTS,key="#id")
     @Override
-    public Product getProductById(int id) {
-        return productRepository.findById(id).orElseThrow(() ->
-         new ProductNotFoundException("Product with "+ id +" not found"));
+    public ProductResponse getProductById(int id) {
+        logger.info("Fetching product {} from database", id);
+        Product product=productRepository.findById(id).orElseThrow(() ->
+                new ProductNotFoundException("Product with "+ id +" not found"));
+        return mapToProductResponse(product);
     }
 
+    private ProductResponse mapToProductResponse(Product product){
+        ProductResponse response = new ProductResponse();
+
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setBrand(product.getBrand());
+        response.setDescription(product.getDescription());
+        response.setPrice(product.getPrice());
+        response.setQuantity(product.getQuantity());
+        response.setSku(product.getSku());
+
+        return response;
+    }
+
+    @CacheEvict(value = CacheNames.PRODUCTS, key = "#id")
     @Override
     public boolean deleteProduct(int id) {
         //Product product=productRepository.findById(id).orElse(null);
@@ -95,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
             return false;
         }
     }
-
+    @CachePut(value = CacheNames.PRODUCTS, key = "#id")
     @Override
     public Product updateProduct(int id, Product product) {
         Product existingProduct=productRepository.findById(id).orElse(null);
