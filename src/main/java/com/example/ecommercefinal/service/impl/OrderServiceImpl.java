@@ -9,6 +9,8 @@ import com.example.ecommercefinal.service.OrderService;
 import com.example.ecommercefinal.service.helper.AuthenticatedUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +25,15 @@ public class OrderServiceImpl implements OrderService {
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final CacheManager cacheManager;
 
-    public OrderServiceImpl(AuthenticatedUserService authenticatedUserService, CartRepository cartRepository, CartItemRepository cartItemRepository, OrderRepository orderRepository, ProductRepository productRepository) {
+    public OrderServiceImpl(AuthenticatedUserService authenticatedUserService, CartRepository cartRepository, CartItemRepository cartItemRepository, OrderRepository orderRepository, ProductRepository productRepository, CacheManager cacheManager) {
         this.authenticatedUserService = authenticatedUserService;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.cacheManager = cacheManager;
     }
     private static final Logger logger= LoggerFactory.getLogger(OrderServiceImpl.class);
 
@@ -70,6 +74,10 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setSubtotal(product.getPrice() * cartItem.getQuantity());
             orderItem.setOrder(order);
             orderItems.add(orderItem);
+            Cache cache = cacheManager.getCache("products");
+            if(cache!=null){
+                cache.evict(product.getId());
+            }
         }
         order.getOrderItems().addAll(orderItems);
         order.setTotalAmount(orderItems.stream().mapToDouble(OrderItem::getSubtotal).sum());

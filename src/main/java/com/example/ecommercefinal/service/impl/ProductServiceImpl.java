@@ -1,6 +1,7 @@
 package com.example.ecommercefinal.service.impl;
 
 import com.example.ecommercefinal.dto.PageResponse;
+import com.example.ecommercefinal.dto.ProductResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.exception.ProductNotFoundException;
 import com.example.ecommercefinal.repository.ProductRepository;
@@ -80,11 +81,27 @@ public class ProductServiceImpl implements ProductService {
 
     @Cacheable(value = "products",key="#id")
     @Override
-    public Product getProductById(int id) {
+    public ProductResponse getProductById(int id) {
         logger.info("Fetching product {} from database", id);
-        return productRepository.findById(id).orElseThrow(() ->
-         new ProductNotFoundException("Product with "+ id +" not found"));
+        Product product=productRepository.findById(id).orElseThrow(() ->
+                new ProductNotFoundException("Product with "+ id +" not found"));
+        return mapToProductResponse(product);
     }
+
+    private ProductResponse mapToProductResponse(Product product){
+        ProductResponse response = new ProductResponse();
+
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setBrand(product.getBrand());
+        response.setDescription(product.getDescription());
+        response.setPrice(product.getPrice());
+        response.setQuantity(product.getQuantity());
+        response.setSku(product.getSku());
+
+        return response;
+    }
+
     @CacheEvict(value = "products", key = "#id")
     @Override
     public boolean deleteProduct(int id) {

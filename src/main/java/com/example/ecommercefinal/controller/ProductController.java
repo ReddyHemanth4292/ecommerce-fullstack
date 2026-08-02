@@ -1,6 +1,7 @@
 package com.example.ecommercefinal.controller;
 
 import com.example.ecommercefinal.dto.PageResponse;
+import com.example.ecommercefinal.dto.ProductResponse;
 import com.example.ecommercefinal.entity.Product;
 import com.example.ecommercefinal.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -107,7 +108,7 @@ public class ProductController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById( @Parameter(description = "Unique product ID", example = "1") @PathVariable int id) throws Exception {
+    public ResponseEntity<ProductResponse> getProductById(@Parameter(description = "Unique product ID", example = "1") @PathVariable int id) throws Exception {
         return new ResponseEntity<>(productService.getProductById(id),HttpStatus.OK);
     }
 
