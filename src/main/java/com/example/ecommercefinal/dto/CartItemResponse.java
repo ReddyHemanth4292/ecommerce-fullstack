@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartItemResponse {
+    private Integer cartItemId;
     private Integer productId;
     private String productName;
     private double price;

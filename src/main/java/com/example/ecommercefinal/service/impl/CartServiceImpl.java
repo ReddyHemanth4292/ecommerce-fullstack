@@ -76,7 +76,7 @@ public class CartServiceImpl implements CartService {
         List<CartItemResponse> itemResponses=cartItems.stream().map(cartItem -> {
             Product product= cartItem.getProduct();
             Double subtotal=product.getPrice() * cartItem.getQuantity();
-            return new CartItemResponse(product.getId(),product.getName(),product.getPrice(),cartItem.getQuantity(),subtotal);
+            return new CartItemResponse(cartItem.getId(),product.getId(),product.getName(),product.getPrice(),cartItem.getQuantity(),subtotal);
         }).collect(Collectors.toList());
         Integer totalItems=itemResponses.stream().mapToInt(CartItemResponse::getQuantity).sum();
         Double totalPrice=itemResponses.stream().mapToDouble(CartItemResponse::getSubtotal).sum();
