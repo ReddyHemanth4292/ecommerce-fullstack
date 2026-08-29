@@ -119,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
             return false;
         }
     }
-    @CachePut(value = CacheNames.PRODUCTS, key = "#id")
+    @CacheEvict(value = CacheNames.PRODUCTS, key = "#id")
     @Override
     public Product updateProduct(int id, Product product) {
         Product existingProduct=productRepository.findById(id).orElse(null);

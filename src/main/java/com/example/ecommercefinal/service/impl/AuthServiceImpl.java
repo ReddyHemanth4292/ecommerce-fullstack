@@ -12,6 +12,7 @@ import com.example.ecommercefinal.service.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,8 +49,10 @@ public class AuthServiceImpl implements AuthService {
                 .authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
         System.out.println(authentication.getName());
         System.out.println(authentication.getAuthorities());
+        UserDetails userDetails =
+                (UserDetails) authentication.getPrincipal();
         JwtService jwtService=new JwtService();
-        AuthResponse authResponse=new AuthResponse(jwtService.generateToken(authentication.getName()));
+        AuthResponse authResponse=new AuthResponse(jwtService.generateToken(userDetails));
         return authResponse;
     }
 }

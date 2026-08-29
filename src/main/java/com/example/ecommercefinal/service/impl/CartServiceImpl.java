@@ -42,24 +42,23 @@ public class CartServiceImpl implements CartService {
     @Override
     public void addProductToCart(Integer productId) {
         User user = authenticatedUserService.getCurrentUser();
-        Product product=productRepository.findById(productId).orElseThrow(()->new ProductNotFoundException("Product Not Found"));
-        Cart cart= cartRepository.findByUser(user).orElse(null);
-        if(cart==null){
-            cart=new Cart();
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException("Product Not Found"));
+        Cart cart = cartRepository.findByUser(user).orElse(null);
+        if (cart == null) {
+            cart = new Cart();
             cart.setUser(user);
             cartRepository.save(cart);
         }
 
-        CartItem cartItem= cartItemRepository.findByCartAndProduct(cart,product).orElse(null);
-        if(cartItem==null){
-            cartItem=new CartItem();
+        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product).orElse(null);
+        if (cartItem == null) {
+            cartItem = new CartItem();
             cartItem.setProduct(product);
             cartItem.setQuantity(1);
             cartItem.setCart(cart);
             cartItemRepository.save(cartItem);
-        }
-        else{
-            cartItem.setQuantity(cartItem.getQuantity()+1);
+        } else {
+            cartItem.setQuantity(cartItem.getQuantity() + 1);
             cartItemRepository.save(cartItem);
         }
 
@@ -71,16 +70,16 @@ public class CartServiceImpl implements CartService {
     public CartResponse getCart() {
         User user = authenticatedUserService.getCurrentUser();
 
-        Cart cart=cartRepository.findByUser(user).orElseThrow(()->new RuntimeException("Cart not found"));
+        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Cart not found"));
         List<CartItem> cartItems = cart.getCartItems();
-        List<CartItemResponse> itemResponses=cartItems.stream().map(cartItem -> {
-            Product product= cartItem.getProduct();
-            Double subtotal=product.getPrice() * cartItem.getQuantity();
-            return new CartItemResponse(product.getId(),product.getName(),product.getPrice(),cartItem.getQuantity(),subtotal);
+        List<CartItemResponse> itemResponses = cartItems.stream().map(cartItem -> {
+            Product product = cartItem.getProduct();
+            Double subtotal = product.getPrice() * cartItem.getQuantity();
+            return new CartItemResponse(cartItem.getId(), product.getId(), product.getName(), product.getPrice(), cartItem.getQuantity(), subtotal);
         }).collect(Collectors.toList());
-        Integer totalItems=itemResponses.stream().mapToInt(CartItemResponse::getQuantity).sum();
-        Double totalPrice=itemResponses.stream().mapToDouble(CartItemResponse::getSubtotal).sum();
-        return new CartResponse(itemResponses,totalItems,totalPrice);
+        Integer totalItems = itemResponses.stream().mapToInt(CartItemResponse::getQuantity).sum();
+        Double totalPrice = itemResponses.stream().mapToDouble(CartItemResponse::getSubtotal).sum();
+        return new CartResponse(itemResponses, totalItems, totalPrice);
     }
 
     @Override
@@ -88,10 +87,10 @@ public class CartServiceImpl implements CartService {
     public void removeCartItem(Integer cartItemId) {
         User user = authenticatedUserService.getCurrentUser();
 
-        Cart cart=cartRepository.findByUser(user).orElseThrow(()-> new RuntimeException("Cart not Found"));
-        CartItem cartItem=cartItemRepository.findById(cartItemId).orElseThrow(()-> new RuntimeException("Cart item not found"));
+        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Cart not Found"));
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new RuntimeException("Cart item not found"));
 
-        if(cartItem.getCart().getId()!=cart.getId()){
+        if (cartItem.getCart().getId() != cart.getId()) {
             throw new RuntimeException("You are not allowed to delete this cart item.");
         }
         cartItemRepository.delete(cartItem);
@@ -101,11 +100,11 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse updateCartItem(Integer cartItemId, UpdateCartItemRequest request) {
-        User user=authenticatedUserService.getCurrentUser();
-        Cart cart=cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Cart not found"));
+        User user = authenticatedUserService.getCurrentUser();
+        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Cart not found"));
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new RuntimeException("Cart item not found"));
 
-        if(!cartItem.getCart().getId().equals(cart.getId())){
+        if (!cartItem.getCart().getId().equals(cart.getId())) {
             throw new RuntimeException("You cannot modify another user's cart.");
         }
 
@@ -117,8 +116,8 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void clearCart() {
-        User user=authenticatedUserService.getCurrentUser();
-        Cart cart=cartRepository.findByUser(user).orElseThrow(()->new RuntimeException("Cart Not found"));
+        User user = authenticatedUserService.getCurrentUser();
+        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Cart Not found"));
         cartItemRepository.deleteAll(cart.getCartItems());
         cart.getCartItems().clear();
     }

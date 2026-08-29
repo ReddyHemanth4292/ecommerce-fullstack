@@ -50,11 +50,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth ->
                                 auth.requestMatchers("/api/auth/**")
                                         .permitAll()
                                         .requestMatchers("/public/**").permitAll()
+//                                        .requestMatchers("/api/**").permitAll()
                                         .requestMatchers("/v3/api-docs/**").permitAll()
                                         .requestMatchers("/swagger-ui/**").permitAll()
                                         .requestMatchers("/actuator/health").permitAll()
@@ -71,6 +72,8 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> {
+                })
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(
                                 (request, response, authException) -> {
