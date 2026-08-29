@@ -32,19 +32,19 @@ public class AuthController {
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
-    @GetMapping("/token")
-    public String token() {
-        JwtService jwtService = new JwtService();
-        return jwtService.generateToken("hemanth@gmail.com");
-    }
+//    @GetMapping("/token")
+//    public String token() {
+//        JwtService jwtService = new JwtService();
+//        return jwtService.generateToken("hemanth@gmail.com");
+//    }
 
-    @GetMapping("/username")
-    public String username() {
-
-        JwtService jwtService = new JwtService();
-        String token =
-                jwtService.generateToken("hemanth@gmail.com");
-
-        return jwtService.extractExpiration(token).toString();
-    }
+//    @GetMapping("/username")
+//    public String username() {
+//
+//        JwtService jwtService = new JwtService();
+//        String token =
+//                jwtService.generateToken("hemanth@gmail.com");
+//
+//        return jwtService.extractExpiration(token).toString();
+//    }
 }
