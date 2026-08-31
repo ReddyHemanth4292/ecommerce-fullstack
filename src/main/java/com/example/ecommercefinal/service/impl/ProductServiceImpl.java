@@ -109,7 +109,10 @@ public class ProductServiceImpl implements ProductService {
         //Product product=productRepository.findById(id).orElse(null);
         if(productRepository.existsById(id)){
             logger.info("Deleting product with id {}", id);
-            productRepository.deleteById(id);
+            Product existingProduct=productRepository.findById(id).orElse(null);
+            existingProduct.setDeleted(true);
+            //productRepository.deleteById(id);
+            productRepository.save(existingProduct);
             logger.info("Product {} deleted successfully", id);
             return true;
         }

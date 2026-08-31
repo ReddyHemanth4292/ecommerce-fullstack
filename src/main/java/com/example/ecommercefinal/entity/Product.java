@@ -31,5 +31,13 @@ public class Product {
     @NotBlank(message = "SKU is required")
     @Size(min = 3, max = 20, message = "SKU must be between 3 and 20 characters")
     private String sku;
+    private boolean isDeleted=false;
 
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public boolean getIsDeleted() {
+        return isDeleted;
+    }
 }
